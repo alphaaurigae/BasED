@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(ed VERSION 888.0)
 
+
 set(MY_PROJECT_NAME "Based")
 #set(MY_PROJECT_BIN1_NAME "caesarshift")
 #set(MY_PROJECT_BIN2_NAME "binary")
@@ -10,16 +11,21 @@ set(MY_PROJECT_NAME "Based")
 #set(MY_PROJECT_BIN5_NAME "hex")
 set(MY_PROJECT_VERSION "888.0")
 
+
 project(${MY_PROJECT_NAME} VERSION ${MY_PROJECT_VERSION} LANGUAGES CXX)
+
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+
 find_program(CXX_COMPILER NAMES g++-11 g++-12 g++-13 g++-14 PATHS /usr/bin /usr/local/bin)
+
 
 if(NOT CXX_COMPILER)
     message(FATAL_ERROR "GCC 11.0 or higher is required")
 endif()
+
 
 execute_process(
     COMMAND ${CXX_COMPILER} --version
@@ -28,23 +34,29 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+
 string(REGEX MATCH "([0-9]+\\.[0-9]+)" GCC_VERSION ${GCC_VERSION_OUTPUT})
+
 
 if(GCC_VERSION VERSION_LESS "11.0.0")
     message(FATAL_ERROR "GCC 11.0 or higher is required, found version: ${GCC_VERSION}")
 endif()
 
+
 set(CMAKE_CXX_COMPILER ${CXX_COMPILER})
+
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type (Debug, Release, RelWithDebInfo, MinSizeRel)" FORCE)
 endif()
+
 
 set(COMPILER_FLAGS_BASE "-Wall -Wextra -Wpedantic -fPIC -pthread")
 set(COMPILER_FLAGS_DEBUG "-O0 -g")
 set(COMPILER_FLAGS_RELEASE "-O3")
 set(COMPILER_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(COMPILER_FLAGS_MINSIZEREL "-Os")
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS_BASE} ${COMPILER_FLAGS_DEBUG}")
@@ -56,10 +68,12 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     set(CMAKE_CXX_FLAGS "${COMPILER_FLAGS_BASE} ${COMPILER_FLAGS_MINSIZEREL}")
 endif()
 
+
 option(ENABLE_DEPENDENCY_GENERATION "Enable dependency generation compile flags" OFF)
 if(ENABLE_DEPENDENCY_GENERATION)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -MMD -MP")
 endif()
+
 
 option(ENABLE_SANITIZERS "Enable sanitizer compile flags for runtime debugging" ON)
 if(ENABLE_SANITIZERS)
@@ -70,20 +84,24 @@ if(ENABLE_SANITIZERS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${SANITIZER_FLAGS}")
 endif()
 
+
 option(ENABLE_COMPILE_COMMANDS "Enable generation of compile_commands.json" OFF)
 if(ENABLE_COMPILE_COMMANDS)
     set(CMAKE_EXPORT_COMPILE_COMMANDS YES CACHE BOOL "Export compile commands" FORCE)
 endif()
+
 
 option(ENABLE_VERBOSE_MAKEFILES "Enable verbose makefiles" OFF)
 if(ENABLE_VERBOSE_MAKEFILES)
     set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Enable verbose makefile output" FORCE)
 endif()
 
+
 option(ENABLE_WARNINGS_AS_ERRORS "Treat warnings as errors" OFF)
 if(ENABLE_WARNINGS_AS_ERRORS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif()
+
 
 option(ENABLE_LOGGING "Enable detailed logging" OFF)
 if(ENABLE_LOGGING)
@@ -92,16 +110,11 @@ else()
     add_definitions(-DDISABLE_LOGGING)
 endif()
 
-set(LIBS
-    gmp
-)
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
 set(BUILD_DIR ${CMAKE_BINARY_DIR}/build)
 set(BIN_DIR ${CMAKE_SOURCE_DIR}/bin)
 
-#file(GLOB_RECURSE SRCS ${SRC_DIR}/*.cpp)  # GLOB_RECURSE only matches files in the current directory (depth 1)
-## file(GLOB_RECURSE SRCS ${SRC_DIR}/**/*.cpp)  # GLOB_RECURSE with '**' matches .cpp files at any depth of subdirectories
 
 include_directories(
 #    /usr/include
@@ -114,11 +127,25 @@ include_directories(
     ${SRC_DIR}/hex
 )
 
+
+#file(GLOB_RECURSE SRCS ${SRC_DIR}/*.cpp)  # GLOB_RECURSE only matches files in the current directory (depth 1)
+## file(GLOB_RECURSE SRCS ${SRC_DIR}/**/*.cpp)  # GLOB_RECURSE with '**' matches .cpp files at any depth of subdirectories
+
+
+set(LIBS_MAIN
+
+)
+set(LIBS_BINARY
+    gmp
+)
+
+
 option(BUILD_CAESARSHIFT "Enable Caesar Shift" ON)
 option(BUILD_BINARY "Enable Binary" ON)
 option(BUILD_BASE "Enable Base" ON)
 option(BUILD_MORSE "Enable Morse" ON)
 option(BUILD_HEX "Enable Hex" ON)
+
 
 function(add_feature_executable FEATURE_NAME FEATURE_SOURCES)
     string(TOUPPER ${FEATURE_NAME} FEATURE_UPPER)
@@ -128,14 +155,16 @@ function(add_feature_executable FEATURE_NAME FEATURE_SOURCES)
         add_executable(${FEATURE_NAME} ${FEATURE_SOURCES})
         target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_MAIN})
 
-        if(FEATURE_NAME STREQUAL "binary")
-            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_CLIENT})
+        # Conditionally link feature-specific libraries
+        if(BUILD_BINARY)
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_BINARY})
         endif()
 
         target_compile_definitions(${FEATURE_NAME} PRIVATE ${FEATURE_UPPER})
         set_target_properties(${FEATURE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
     endif()
 endfunction()
+
 
 add_feature_executable(caesarshift ${SRC_DIR}/caesarshift/caesarshift.cpp)
 add_feature_executable(binary ${SRC_DIR}/binary/binary.cpp )
@@ -146,6 +175,7 @@ add_feature_executable(hex ${SRC_DIR}/hex/hex.cpp)
 
 file(MAKE_DIRECTORY ${BUILD_DIR})
 file(MAKE_DIRECTORY ${BIN_DIR})
+
 
 add_custom_target(clear_build COMMAND rm -rf ${BUILD_DIR} ${BIN_DIR} COMMENT "Clean build and bin directories")
 
