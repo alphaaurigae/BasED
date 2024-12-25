@@ -1,11 +1,41 @@
 #!/bin/bash
 
 
+BOLD='\033[1m'
+BRIGHT_WHITE='\033[1;37m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+RESET='\033[0m'
+
+local test_name="$1"
+local expected="$2"
+local output="$3"
+
+debug_assert_equals() {
+  if [ "$output" != "$expected" ]; then
+    echo "${RED}TEST FAILED: $test_name${RESET}"
+    echo "DEBUG: Expected:"
+    echo "$expected"
+    echo "DEBUG: Got:"
+    echo "$output"
+    assertEquals "Test '$test_name' failed." "$expected" "$output"
+  else
+    echo "${GREEN}TEST PASSED: $test_name${RESET}"
+    echo "DEBUG: Expected:"
+    echo "$expected"
+    echo "DEBUG: Got:"
+    echo "$output"
+    assertEquals "Test '$test_name' passed." "$expected" "$output"
+  fi
+}
+
+
 # Test Hex Encode and Decoding
 test_HexEncode() {
     output=$(bin/hex --hex --encode -i "test!")
     expected="Encoded: 7465737421"
     assertEquals "Hex Encode Test Failed" "$expected" "$output"
+  debug_assert_equals "test_print005" "$expected" "$output"
 }
 test_HexDecode() {
     output=$(bin/hex --hex --decode -i "7465737421")

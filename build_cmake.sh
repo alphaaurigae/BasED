@@ -1,23 +1,38 @@
 #!/bin/bash
 
-# Define directories
+
+BOLD='\033[1m'
+BRIGHT_WHITE='\033[1;37m'
+RESET='\033[0m' 
+
 BUILD_DIR=build
 BIN_DIR=bin
+BIN_NAME_1='base'
 
-# Run cmake to configure the build
 configure() {
-    echo "Configuring project with cmake..."
+    echo -e "${BOLD}${BRIGHT_WHITE}Configuring project with cmake...${RESET}"
     mkdir -p ${BUILD_DIR}
     cmake -S . -B ${BUILD_DIR} -DCMAKE_VERBOSE_MAKEFILE=ON
 }
 
-# Build the project
 build() {
-    echo "Building project..."
+    echo -e "${BOLD}${BRIGHT_WHITE}Building project...${RESET}"
     cmake --build ${BUILD_DIR} --target all -- -j$(nproc) --debug
 }
 
-# Main function
+
+./clean_cmake.sh
+
 configure
 build
+
+echo -e "${BOLD}${BRIGHT_WHITE}Unit test shunit2 (unit/shunit2test.sh)${RESET}"
 ./shunit2_run.sh
+
+
+echo ""
+echo -e "${BOLD}${BRIGHT_WHITE}See unit test results and check build success ... bin should be in $BIN_DIR e.g: ${BIN_DIR}/${BIN_NAME_1}${RESET}"
+echo ""
+echo -e "${BOLD}${BRIGHT_WHITE}E.g:${RESET}"
+echo ""
+echo -e "${BOLD}${BRIGHT_WHITE}${BIN_DIR}/${BIN_NAME_1} -h${RESET}"

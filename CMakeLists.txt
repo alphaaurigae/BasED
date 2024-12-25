@@ -1,3 +1,5 @@
+# Single bin template
+
 
 cmake_minimum_required(VERSION 3.10)
 project(ed VERSION 888.0)
