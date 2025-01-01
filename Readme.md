@@ -16,6 +16,7 @@
 - Build OS: "Ubuntu 24.04"
 
 ... cmake ...
+(g++/clang - Cmakelists "option(USE_CLANG" ON/OFF - default clang)
 
 - ```./build_cmake.sh``` - build
 - ```./clean_cmake.sh``` - tidy build
@@ -36,7 +37,7 @@ Encoded: ..-. --- .-. - ..- -. .
 $ bin/hex --hex -e -i abcdef
 Encoded: 616263646566
 
-``
+```
 
 ## Todo
 
