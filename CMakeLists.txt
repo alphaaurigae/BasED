@@ -1,17 +1,19 @@
-# Multi bin template
+# Single & multi bin template
 
 # Main --------------------------------------------------------------------------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.28.3)
-project(ed VERSION 888.0)
 
 
 set(MY_PROJECT_NAME "Based")
-#set(MY_PROJECT_BIN1_NAME "caesarshift")
-#set(MY_PROJECT_BIN2_NAME "binary")
-#set(MY_PROJECT_BIN3_NAME "base")
-#set(MY_PROJECT_BIN4_NAME "morse")
-#set(MY_PROJECT_BIN5_NAME "hex")
-set(MY_PROJECT_VERSION "888.0")
+set(MY_PROJECT_VERSION "888.0.0")
+
+
+set(MY_PROJECT_BIN1_NAME "caesarshift")
+set(MY_PROJECT_BIN2_NAME "binary")
+set(MY_PROJECT_BIN3_NAME "base")
+set(MY_PROJECT_BIN4_NAME "morse")
+set(MY_PROJECT_BIN5_NAME "hex")
+# [add executeables here] main name definition
 
 
 project(${MY_PROJECT_NAME} VERSION ${MY_PROJECT_VERSION} LANGUAGES CXX)
@@ -209,66 +211,93 @@ include_directories(
 #    /usr/include
     ${SRC_DIR}
     ${SRC_DIR}/shared
-    ${SRC_DIR}/caesarshift
-    ${SRC_DIR}/binary
-    ${SRC_DIR}/base
-    ${SRC_DIR}/morse
-    ${SRC_DIR}/hex
+    ${SRC_DIR}/${MY_PROJECT_BIN1_NAME}
+    ${SRC_DIR}/${MY_PROJECT_BIN2_NAME}
+    ${SRC_DIR}/${MY_PROJECT_BIN3_NAME}
+    ${SRC_DIR}/${MY_PROJECT_BIN4_NAME}
+    ${SRC_DIR}/${MY_PROJECT_BIN5_NAME}
 )
 
 
-#file(GLOB_RECURSE SRCS ${SRC_DIR}/*.cpp)  # GLOB_RECURSE only matches files in the current directory (depth 1)
-## file(GLOB_RECURSE SRCS ${SRC_DIR}/**/*.cpp)  # GLOB_RECURSE with '**' matches .cpp files at any depth of subdirectories
+# need globbing? ...
+# file(GLOB_RECURSE SRCS ${SRC_DIR}/*.cpp)  # depth 1
+# file(GLOB_RECURSE SRCS ${SRC_DIR}/**/*.cpp)  # depth 1+
+
 
 # Build -------------------------------------------------------------------------------------------------------------------------------------
 
 
+# global
 set(LIBS_MAIN
-
-)
-set(LIBS_BINARY
-    gmp
 )
 
+# per bin
+set(LIBS_${MY_PROJECT_BIN1_NAME}
+)
 
-option(BUILD_CAESARSHIFT "Enable Caesar Shift" ON)
-option(BUILD_BINARY "Enable Binary" ON)
-option(BUILD_BASE "Enable Base" ON)
-option(BUILD_MORSE "Enable Morse" ON)
-option(BUILD_HEX "Enable Hex" ON)
+set(LIBS_${MY_PROJECT_BIN2_NAME}
+gmp
+)
+
+set(LIBS_${MY_PROJECT_BIN3_NAME}
+gmp
+)
+
+set(LIBS_${MY_PROJECT_BIN4_NAME}
+)
+
+set(LIBS_${MY_PROJECT_BIN5_NAME}
+)
+
+
+option(BUILD_${MY_PROJECT_BIN1_NAME} "Enable ${MY_PROJECT_BIN1_NAME}" ON)
+option(BUILD_${MY_PROJECT_BIN2_NAME} "Enable ${MY_PROJECT_BIN2_NAME}" ON)
+option(BUILD_${MY_PROJECT_BIN3_NAME} "Enable ${MY_PROJECT_BIN3_NAME}" ON)
+option(BUILD_${MY_PROJECT_BIN4_NAME} "Enable ${MY_PROJECT_BIN4_NAME}" ON)
+option(BUILD_${MY_PROJECT_BIN5_NAME} "Enable ${MY_PROJECT_BIN5_NAME}" ON)
+# [add executeables here]
 
 
 function(add_feature_executable FEATURE_NAME FEATURE_SOURCES)
-    string(TOUPPER ${FEATURE_NAME} FEATURE_UPPER)
-    set(FEATURE_OPTION "BUILD_${FEATURE_UPPER}")
+    set(FEATURE_OPTION "BUILD_${FEATURE_NAME}")
 
     if(${${FEATURE_OPTION}})
         add_executable(${FEATURE_NAME} ${FEATURE_SOURCES})
         target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_MAIN})
 
         # Conditionally link feature-specific libraries
-        if(BUILD_BINARY)
-            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_BINARY})
+        if(${FEATURE_NAME} STREQUAL ${MY_PROJECT_BIN1_NAME})
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_${MY_PROJECT_BIN1_NAME}})
         endif()
+        if(${FEATURE_NAME} STREQUAL ${MY_PROJECT_BIN2_NAME})
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_${MY_PROJECT_BIN2_NAME}})
+        endif()
+        if(${FEATURE_NAME} STREQUAL ${MY_PROJECT_BIN3_NAME})
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_${MY_PROJECT_BIN3_NAME}})
+        endif()
+        if(${FEATURE_NAME} STREQUAL ${MY_PROJECT_BIN4_NAME})
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_${MY_PROJECT_BIN4_NAME}})
+        endif()
+        if(${FEATURE_NAME} STREQUAL ${MY_PROJECT_BIN5_NAME})
+            target_link_libraries(${FEATURE_NAME} PRIVATE ${LIBS_${MY_PROJECT_BIN5_NAME}})
+        endif()
+        # [add executeables here]
 
-        target_compile_definitions(${FEATURE_NAME} PRIVATE ${FEATURE_UPPER})
         set_target_properties(${FEATURE_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BIN_DIR})
     endif()
 endfunction()
 
 
-add_feature_executable(caesarshift ${SRC_DIR}/caesarshift/caesarshift.cpp)
-add_feature_executable(binary ${SRC_DIR}/binary/binary.cpp )
-add_feature_executable(base ${SRC_DIR}/base/base.cpp)
-add_feature_executable(morse ${SRC_DIR}/morse/morse.cpp)
-add_feature_executable(hex ${SRC_DIR}/hex/hex.cpp)
+add_feature_executable(${MY_PROJECT_BIN1_NAME} ${SRC_DIR}/${MY_PROJECT_BIN1_NAME}/main.cpp)
+add_feature_executable(${MY_PROJECT_BIN2_NAME} ${SRC_DIR}/${MY_PROJECT_BIN2_NAME}/main.cpp)
+add_feature_executable(${MY_PROJECT_BIN3_NAME} ${SRC_DIR}/${MY_PROJECT_BIN3_NAME}/main.cpp)
+add_feature_executable(${MY_PROJECT_BIN4_NAME} ${SRC_DIR}/${MY_PROJECT_BIN4_NAME}/main.cpp)
+add_feature_executable(${MY_PROJECT_BIN5_NAME} ${SRC_DIR}/${MY_PROJECT_BIN5_NAME}/main.cpp)
+# [add executeables here]
 
 
 file(MAKE_DIRECTORY ${BUILD_DIR})
 file(MAKE_DIRECTORY ${BIN_DIR})
-
-
-add_custom_target(clear_build COMMAND rm -rf ${BUILD_DIR} ${BIN_DIR} COMMENT "Clean build and bin directories")
 
 
 # Clean -------------------------------------------------------------------------------------------------------------------------------------
@@ -299,11 +328,15 @@ message(STATUS "Verbose Makefiles: ${ENABLE_VERBOSE_MAKEFILES}")
 message(STATUS "Compile Commands Export: ${ENABLE_COMPILE_COMMANDS}")
 message(STATUS "------------------------------------------------------------")
 
-message(STATUS "Enable Caesar Shift: ${BUILD_CAESARSHIFT}")
-message(STATUS "Enable Binary: ${BUILD_BINARY}")
-message(STATUS "Enable Base: ${BUILD_BASE}")
-message(STATUS "Enable Morse: ${BUILD_MORSE}")
-message(STATUS "Enable Hex: ${BUILD_HEX}")
+message(STATUS "Build ${MY_PROJECT_BIN1_NAME}: ${BUILD_${MY_PROJECT_BIN1_NAME}}")
+message(STATUS "Build ${MY_PROJECT_BIN2_NAME}: ${BUILD_${MY_PROJECT_BIN2_NAME}}")
+message(STATUS "Build ${MY_PROJECT_BIN3_NAME}: ${BUILD_${MY_PROJECT_BIN3_NAME}}")
+message(STATUS "Build ${MY_PROJECT_BIN4_NAME}: ${BUILD_${MY_PROJECT_BIN4_NAME}}")
+message(STATUS "Build ${MY_PROJECT_BIN5_NAME}: ${BUILD_${MY_PROJECT_BIN5_NAME}}")
+# [add executeables here]
+
+
+# because why not ...
 set(ASCII_ART "
 
     dBBBBb dBBBBBb  .dBBBBP   dBBBP  dBBBBb
@@ -315,6 +348,7 @@ set(ASCII_ART "
 VERSION ${MY_PROJECT_VERSION}
 ")
 message(STATUS "${ASCII_ART}")
+
 
 
 
