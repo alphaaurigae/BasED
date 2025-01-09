@@ -8,7 +8,7 @@
 #include <CLI/CLI.hpp>
 
 
-// struct for handling void process_arguments (cli11 menu) main shared parts
+// handle void process_arguments main.cpp
 struct AppSettings {
     bool encode = false;
     bool decode = false;
@@ -18,7 +18,11 @@ struct AppSettings {
 
     bool show_man = false;
 
-    CLI::Option* man_opt = nullptr;  // magic to build with  man_opt without moving it to the exec source file.
+
+    // init pre
+    CLI::Option* man_opt = nullptr;
+
+    // general arguments e.g multi bin
     void setup_app(CLI::App& app) {
         auto encode_opt = app.add_flag("-e, --encode", encode, "Encode the input");
         auto decode_opt = app.add_flag("-d, --decode", decode, "Decode the input");
@@ -36,7 +40,6 @@ struct AppSettings {
         man_opt->excludes(encode_opt);
         man_opt->excludes(pipe_opt);
         man_opt->excludes(input_opt);
-
     }
 };
 

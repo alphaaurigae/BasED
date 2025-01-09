@@ -5,8 +5,8 @@
 #include "argument_parser.h"
 #include "argument_validation.h"
 #include "pipe_input_handler.h"
-#include "main_man.h"
-#include "cout_man.h"
+#include "man_main.h"
+#include "man_cout.h"
 
 #include <functional>
 #include <iostream>
@@ -73,6 +73,7 @@ void process_arguments(CLI::App& app, int argc, char* argv[]) {
     AppSettings settings;
     settings.setup_app(app);
 
+
     // var
     bool base16 = false;
     auto base16_opt = app.add_flag("--base16", base16, "base16");
@@ -92,7 +93,9 @@ void process_arguments(CLI::App& app, int argc, char* argv[]) {
 
 
     parse_arguments(app, argc, argv);  // argument_parser.h
-    cout_man(settings.show_man);  // cout_man.h"
+    cout_man(settings.show_man);  // man_cout.h"
+
+    // input handling
     validate_arguments(settings);  // argument_validation.h
 
     // var

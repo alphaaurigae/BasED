@@ -5,8 +5,8 @@
 #include "argument_parser.h"
 #include "argument_validation.h"
 #include "pipe_input_handler.h"
-#include "main_man.h"
-#include "cout_man.h"
+#include "man_main.h"
+#include "man_cout.h"
 
 #include <functional>
 #include <iostream>
