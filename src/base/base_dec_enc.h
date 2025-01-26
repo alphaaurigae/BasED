@@ -18,9 +18,10 @@ constexpr std::string_view BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZa
 constexpr std::string_view BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 constexpr std::string_view BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-constexpr std::string_view BASE85_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&'()*+,-./:;<=>?@^_`{|}~";
+constexpr std::string_view BASE85_ALPHABET = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstu";
 
-constexpr std::string_view BASE91_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,-./:;<=>?@[]^_`{|}~\"`{|}~";
+constexpr std::string_view BASE91_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
+
 
 constexpr auto CREATE_LOOKUP_TABLE(const std::string_view alphabet) {
     std::array<int, 256> lookup_table{};
@@ -40,7 +41,7 @@ CREATE_BASE_LOOKUP_TABLE(32)
 CREATE_BASE_LOOKUP_TABLE(58)
 CREATE_BASE_LOOKUP_TABLE(62)
 CREATE_BASE_LOOKUP_TABLE(64)
-
+CREATE_BASE_LOOKUP_TABLE(85)
 
 std::string base_encode(const std::string& data, const std::string_view& alphabet, const std::array<int, 256>& lookup_table) {
 
@@ -93,8 +94,43 @@ std::string base_encode(const std::string& data, const std::string_view& alphabe
     }
 
     return result;
-}
 
+} else if (alphabet == BASE85_ALPHABET) {
+    std::string result;
+    size_t i = 0;
+    size_t len = data.size();
+
+    while (i < len) {
+        uint32_t value = 0;
+        int count = 0;
+
+        for (int j = 0; j < 4; ++j) {
+            if (i < len) {
+                value = (value << 8) | static_cast<unsigned char>(data[i++]);
+                count++;
+            } else {
+                value <<= 8;
+            }
+        }
+
+        if (value == 0 && count == 4) {
+            result.push_back('z');
+            continue;
+        }
+
+        char base85_chars[5];
+        for (int j = 4; j >= 0; --j) {
+            base85_chars[j] = BASE85_ALPHABET[value % 85];
+            value /= 85;
+        }
+
+        for (int j = 0; j < count + 1; ++j) {
+            result.push_back(base85_chars[j]);
+        }
+    }
+
+    return result;
+}
 
     mpz_t value;
     mpz_init(value);
@@ -175,6 +211,52 @@ std::string base_decode(const std::string& encoded, const std::string_view& alph
     }
 
     return result;
+} else if (alphabet == BASE85_ALPHABET) {
+    std::string result;
+    size_t i = 0;
+    size_t len = encoded.size();
+
+    while (i < len) {
+        if (encoded[i] == 'z') {
+            result.append(4, 0);
+            ++i;
+            continue;
+        }
+
+        if (encoded[i] == 'y') {
+            result.append(4, ' ');
+            ++i;
+            continue;
+        }
+
+        uint32_t value = 0;
+        int count = 0;
+
+        for (int j = 0; j < 5; ++j) {
+            if (i >= len) {
+                value = value * 85 + 84;
+            } else {
+                char c = encoded[i++];
+                if (c == ' ' || c == '\n' || c == '\r') {
+                    --j;
+                    continue;
+                }
+                int index = BASE85_LOOKUP_TABLE[static_cast<unsigned char>(c)];
+                if (index == -1) {
+                    throw std::invalid_argument("Invalid character in Base85 string.");
+                }
+                value = value * 85 + index;
+                ++count;
+            }
+        }
+
+        int bytes_to_write = (count == 0) ? 0 : count - 1;
+        for (int j = 0; j < bytes_to_write; ++j) {
+            result.push_back(static_cast<char>((value >> (24 - j * 8)) & 0xFF));
+        }
+    }
+
+    return result;
 }
 
     mpz_t value;
@@ -229,6 +311,7 @@ DEFINE_BASE_FUNCTIONS(base32, BASE32_ALPHABET, BASE32_LOOKUP_TABLE)
 DEFINE_BASE_FUNCTIONS(base58, BASE58_ALPHABET, BASE58_LOOKUP_TABLE)
 DEFINE_BASE_FUNCTIONS(base62, BASE62_ALPHABET, BASE62_LOOKUP_TABLE)
 DEFINE_BASE_FUNCTIONS(base64, BASE64_ALPHABET, BASE64_LOOKUP_TABLE)
+DEFINE_BASE_FUNCTIONS(base85, BASE85_ALPHABET, BASE85_LOOKUP_TABLE)
 
 #endif
 

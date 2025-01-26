@@ -22,11 +22,13 @@
 - ```./clean_cmake.sh``` - tidy build
 
 ```
+// allnum, digit, alpha
 $ bin/caesarshift --caesarshift 4 --mode allnum -e -i 2Jh2t79Fzwucef
 Encoded: 2Jh2t79Fzwucef
 
-$ bin/base --base -e -i 2Jh2t79FzwucefJobPETxzu5UnpY8ExsthWxJATzWfCmAV8ABbFR4HzJZgWqVfVXq5tYs2ysBCe9N
-Encoded: NSVFiu4xrbyLBAeTwDgtbzchfBXCvyVejQahgh2tBF9zwbMRgGQvRLfhf2pxm4J6hhwSv2PoJStfpHsDu5y9jMDthd7uotvqXLVkevMC9
+// 16,32,58,62,64,85
+$ bin/base --base85 -e -i 'bayzed'
+Encoded: @UXP.ARk
 
 $ bin/binary --binary -d -i 00110011001101000011010100110011001100100011010000110101
 Decoded: 3453245
