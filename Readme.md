@@ -43,4 +43,5 @@ Encoded: 616263646566
 
 ## Todo
 
-"allthethings"
+- unit tests base85
+- base91 ... other
