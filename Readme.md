@@ -26,7 +26,7 @@
 $ bin/caesarshift --caesarshift 4 --mode allnum -e -i 2Jh2t79Fzwucef
 Encoded: 2Jh2t79Fzwucef
 
-// 16,32,58,62,64,85
+// 16,32,58,62,64,85,91
 $ bin/base --base85 -e -i 'bayzed'
 Encoded: @UXP.ARk
 
@@ -43,5 +43,5 @@ Encoded: 616263646566
 
 ## Todo
 
-- unit tests base85
-- base91 ... other
+- unit tests base85, base91
+- more base  encode / decode and variations e.g ipv6 base85

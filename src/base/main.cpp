@@ -41,10 +41,14 @@ void exec_man() {
     std::cout << "Base85:\n\n";
     std::cout << "bin/base --base85 -e -i 'bayzed'\n";
     std::cout << "bin/base --base85 -d -i 'H?sm`H?f'\n\n";
+
+    std::cout << "Base91:\n\n";
+    std::cout << "bin/base --base91 -e -i 'abcdefghijklmnopqrstuvwxyz1234567890!\"§$%&/())=?.;'\n";
+    std::cout << "bin/base --base91 -d -i '#G(Ic,5ph#77&xrmlrjgs@DZ7UB>xQGrQztEml0o[2;(|XY)INZwOhvzW0{},jH'\n\n";
 }
 
 
-void handle_entered_input(const std::string& input, bool encode, bool decode, bool base58, bool base16, bool base32, bool base62, bool base64, bool base85) { // var
+void handle_entered_input(const std::string& input, bool encode, bool decode, bool base58, bool base16, bool base32, bool base62, bool base64, bool base85, bool base91) { // var
 
     validate_input(input, encode, decode);  // input_validation.h
 
@@ -57,13 +61,14 @@ void handle_entered_input(const std::string& input, bool encode, bool decode, bo
         encode_func = (encode) ? base16_encode : base16_decode;
     } else if (base32) {
         encode_func = (encode) ? base32_encode : base32_decode;
-
     } else if (base62) {
         encode_func = (encode) ? base62_encode : base62_decode;
     } else if (base64) {
         encode_func = (encode) ? base64_encode : base64_decode;
     } else if (base85) {
         encode_func = (encode) ? base85_encode : base85_decode;
+    } else if (base91) {
+        encode_func = (encode) ? base91_encode : base91_decode;
     } else {
         std::cout << "Unsupported operation." << std::endl;
         return;
@@ -93,12 +98,16 @@ void process_arguments(CLI::App& app, int argc, char* argv[]) {
     auto base64_opt = app.add_flag("--base64", base64, "base64");
     bool base85 = false;
     auto base85_opt = app.add_flag("--base85", base85, "base85");
+    bool base91 = false;
+    auto base91_opt = app.add_flag("--base91", base91, "base91");
+
     base16_opt->excludes(settings.man_opt);
     base32_opt->excludes(settings.man_opt);
     base58_opt->excludes(settings.man_opt);
     base62_opt->excludes(settings.man_opt);
     base64_opt->excludes(settings.man_opt);
     base85_opt->excludes(settings.man_opt);
+    base91_opt->excludes(settings.man_opt);
 
     parse_arguments(app, argc, argv);  // argument_parser.h
     cout_man(settings.show_man);  // man_cout.h"
@@ -107,14 +116,14 @@ void process_arguments(CLI::App& app, int argc, char* argv[]) {
     validate_arguments(settings);  // argument_validation.h
 
     // var
-    if (!base58 && !base16 && !base32 && !base62 & !base64 & !base85) {
+    if (!base58 && !base16 && !base32 && !base62 & !base64 & !base85 & !base91) {
         std::cout << "Error: You must specify either --base58 or --base62 for encoding/decoding.\n";
         return;
     }
     handle_pipe_input(settings);  // input_pipe.h
 
     if (!settings.input.empty()) {
-        handle_entered_input(settings.input, settings.encode, settings.decode, base58, base16, base32, base62, base64, base85); // var
+        handle_entered_input(settings.input, settings.encode, settings.decode, base58, base16, base32, base62, base64, base85, base91); // var
     }
 }
 
